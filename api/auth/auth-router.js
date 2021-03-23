@@ -73,19 +73,24 @@ router.post('/login', checkPasswordLength, checkUsernameExists(), (req, res, nex
     "message": "Invalid credentials"
   }
  */
-router.get('/logout', (req, res, next) => {
-  if(req.session){
-    req.session.destroy(err => {
-      if(err) {
-        res.send('error logging out')
+  router.get('/logout', async (req, res, next) => {
+    try {
+      if (!req.session || !req.session.user) {
+        res.status(200).json({ message: 'no session' });
       } else {
-        res.status(200).json({message: 'logged out'})
+        req.session.destroy(err => {
+          if (err) {
+            next(err);
+          } else {
+            res.status(200).json({ message: 'logged out' });
+          }
+        });
       }
-    })
-  } else {
-    res.status(200).json({message: 'no session'})
-  }
-})
+    } catch (err) {
+      next(err);
+    }
+  });
+  
 
 
 /**
